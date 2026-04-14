@@ -1,3 +1,7 @@
+//! # App Container
+//!
+//! Construct the concrete dependency graph for the RAG service.
+
 use std::sync::Arc;
 
 use crate::services::cache_service::CacheService;
@@ -14,11 +18,20 @@ use crate::config::client_config::ClientConfig;
 
 use shared::resilience::circuit_breaker::CircuitBreaker;
 
+/// Hold fully-wired application components.
+///
+/// ## Fields
+/// - `pipeline`: Ready-to-use RAG pipeline shared by transport handlers.
 pub struct AppContainer {
+    /// Ready-to-use RAG pipeline shared by transport handlers.
     pub pipeline: Arc<RagPipeline>,
 }
 
 impl AppContainer {
+    /// Build the application dependency container.
+    ///
+    /// ## Returns
+    /// An `AppContainer` with configured clients, services, and pipeline.
     pub fn new() -> Self {
         // 1. Load config (hardcoded for now)
         let app_config = AppConfig {

@@ -1,29 +1,61 @@
+//! # Domain Errors
+//!
+//! Define shared error types used across services.
+//!
+//! ## Design
+//! Keep failures categorized so resilience policies can decide retry and fallback behavior.
+
 use std::fmt;
 
+/// Represent errors that can occur across the distributed inference workflow.
+///
+/// ## Variants
+/// - `CacheMiss`: Requested entry is not present in cache.
+/// - `CacheError`: Cache backend returned an error.
+/// - `EmbeddingError`: Embedding generation failed.
+/// - `VectorSearchError`: Vector search failed.
+/// - `LLMError`: LLM generation failed.
+/// - `Timeout`: Operation exceeded configured deadline.
+/// - `CircuitOpen`: Circuit breaker rejected the request.
+/// - `InternalError`: Internal failure not covered by other categories.
+///
+/// ## Examples
+/// ```rust
+/// use shared::domain::errors::AppError;
+///
+/// let err = AppError::Timeout;
+/// assert!(err.is_retryable());
+/// ```
 #[derive(Debug, Clone)]
 pub enum AppError {
-    // Cache
+    /// Requested entry is not present in cache.
     CacheMiss,
+    /// Cache backend returned an error message.
     CacheError(String),
 
-    // Embedding
+    /// Embedding generation failed.
     EmbeddingError(String),
 
-    // Vector DB
+    /// Vector search failed.
     VectorSearchError(String),
 
-    // LLM
+    /// LLM generation failed.
     LLMError(String),
 
-    // Resilience
+    /// Operation exceeded configured deadline.
     Timeout,
+    /// Circuit breaker rejected the request.
     CircuitOpen,
 
-    // System
+    /// Internal failure not covered by other categories.
     InternalError(String),
 }
 
 impl AppError {
+    /// Determine whether this error should be retried.
+    ///
+    /// ## Returns
+    /// `true` for transient failures and `false` for terminal failures.
     pub fn is_retryable(&self) -> bool {
         matches!(
             self,

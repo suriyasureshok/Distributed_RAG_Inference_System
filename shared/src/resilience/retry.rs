@@ -1,7 +1,28 @@
+//! # Retry
+//!
+//! Provide retry logic with exponential backoff for retryable failures.
+
 use std::time::Duration;
 use tokio::time::sleep;
 use crate::domain::errors::AppError;
 
+/// Execute an asynchronous task with retry and exponential backoff.
+///
+/// ## Type Parameters
+/// - `F`: Closure that creates a future for each attempt.
+/// - `Fut`: Future returned by `F`.
+/// - `T`: Successful result type.
+///
+/// ## Arguments
+/// - `max_retries`: Maximum number of retry attempts after the first failure.
+/// - `task`: Asynchronous task to execute.
+///
+/// ## Returns
+/// The first successful task result.
+///
+/// ## Errors
+/// Returns the last encountered non-retryable error, or the final error after
+/// exhausting retries.
 pub async fn retry_with_backoff<F, Fut, T>(
     max_retries: u32,
     mut task: F,

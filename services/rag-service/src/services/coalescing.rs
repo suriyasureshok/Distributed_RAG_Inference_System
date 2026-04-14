@@ -1,23 +1,45 @@
+//! # Coalescing
+//!
+//! Deduplicate concurrent work for identical request keys.
+
 use dashmap::DashMap;
 use std::sync::Arc;
 use tokio::sync::{Mutex, Notify};
 
+/// Coalesce concurrent operations by key to avoid duplicate downstream calls.
 pub struct Coalescer<T> {
     in_flight: DashMap<String, Arc<InFlight<T>>>,
 }
 
+/// Track in-flight task result and waiter notification primitives.
 struct InFlight<T> {
     result: Mutex<Option<T>>,
     notify: Notify,
 }
 
 impl<T: Clone + Send + Sync + 'static> Coalescer<T> {
+    /// Create an empty coalescer.
+    ///
+    /// ## Returns
+    /// A `Coalescer` with no in-flight keys.
     pub fn new() -> Self {
         Self {
             in_flight: DashMap::new(),
         }
     }
 
+    /// Execute task once per key and share result with concurrent waiters.
+    ///
+    /// ## Type Parameters
+    /// - `F`: Task factory closure.
+    /// - `Fut`: Future produced by `F`.
+    ///
+    /// ## Arguments
+    /// - `key`: Coalescing key used to group requests.
+    /// - `task`: Asynchronous operation to execute once for the key.
+    ///
+    /// ## Returns
+    /// The computed task result.
     pub async fn run<F, Fut>(&self, key: String, task: F) -> T
     where
         F: FnOnce() -> Fut,

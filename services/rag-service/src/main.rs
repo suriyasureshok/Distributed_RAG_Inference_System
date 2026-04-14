@@ -1,3 +1,16 @@
+//! # rag-service
+//!
+//! Expose a retrieval-augmented generation service over HTTP.
+//!
+//! ## Overview
+//! This binary wires transport, pipeline, clients, and shared utilities to serve
+//! query requests at runtime.
+//!
+//! ## Features
+//! - Axum-based HTTP endpoint for query execution.
+//! - RAG pipeline with cache, retrieval, and generation stages.
+//! - Shared resilience and observability integration.
+
 mod application;
 mod clients;
 mod config;
@@ -13,6 +26,7 @@ use tokio::net::TcpListener;
 use transport::router::create_router;
 use wiring::container::AppContainer;
 
+/// Start the HTTP server and mount the RAG router.
 #[tokio::main]
 async fn main() {
     let app = AppContainer::new();

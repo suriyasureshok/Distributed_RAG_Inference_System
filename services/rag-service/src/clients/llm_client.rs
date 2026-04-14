@@ -1,3 +1,7 @@
+//! # LLM Client
+//!
+//! Provide response generation with retry, timeout, and circuit-breaker guards.
+
 use std::sync::Arc;
 
 use shared::domain::errors::AppError;
@@ -8,12 +12,21 @@ use shared::resilience::timeout::with_timeout;
 
 use crate::config::client_config::ClientConfig;
 
+/// Wrap LLM generation calls behind resilience policies and fallback behavior.
 pub struct LLMClient {
     config: ClientConfig,
     circuit_breaker: Arc<CircuitBreaker>,
 }
 
 impl LLMClient {
+    /// Create a new LLM client.
+    ///
+    /// ## Arguments
+    /// - `config`: Timeout and retry configuration.
+    /// - `circuit_breaker`: Shared breaker used to gate downstream calls.
+    ///
+    /// ## Returns
+    /// A configured `LLMClient`.
     pub fn new(config: ClientConfig, circuit_breaker: Arc<CircuitBreaker>) -> Self {
         Self {
             config,
@@ -21,6 +34,16 @@ impl LLMClient {
         }
     }
 
+    /// Generate a response from retrieved context documents.
+    ///
+    /// ## Arguments
+    /// - `_context`: Retrieved context snippets.
+    ///
+    /// ## Returns
+    /// Generated response text.
+    ///
+    /// ## Errors
+    /// Returns `AppError` for non-retryable or terminal failures.
     pub async fn generate(&self, _context: Vec<String>) -> Result<String, AppError> {
         let config = &self.config;
         let cb = self.circuit_breaker.clone();
@@ -50,6 +73,13 @@ impl LLMClient {
         }
     }
 
+    /// Return a fallback response when primary generation fails.
+    ///
+    /// ## Arguments
+    /// - `_context`: Retrieved context snippets.
+    ///
+    /// ## Returns
+    /// Fallback response text.
     async fn fallback(&self, _context: Vec<String>) -> Result<String, AppError> {
         // fallback logic (cheap model / default response)
         Ok("Fallback response".to_string())

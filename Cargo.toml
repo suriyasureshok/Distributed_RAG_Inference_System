@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    "services/api-gateway",
+    "services/rag-service",
+    "services/embedding-service",
+    "services/llm-service",
+    "shared",
+]

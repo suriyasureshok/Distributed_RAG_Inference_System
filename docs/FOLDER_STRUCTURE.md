@@ -24,7 +24,7 @@ rag-infra-system/
 │   ├── embedding-service/
 │   │   ├── src/
 │   │   │   ├── main.rs
-│   │   │   ├── model/
+│   │   │   ├── transport/
 │   │   │   ├── service/
 │   │   │   └── config/
 │   │   ├── Cargo.toml

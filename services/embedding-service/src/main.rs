@@ -11,9 +11,9 @@
 //! - Deterministic mock embedding generation for local development.
 //! - Lightweight dependency container for shared state.
 
-mod transport;
-mod service;
 mod config;
+mod service;
+mod transport;
 mod wiring;
 
 use std::net::SocketAddr;
@@ -21,8 +21,9 @@ use std::net::SocketAddr;
 use axum::serve;
 use tokio::net::TcpListener;
 
-use wiring::container::AppContainer;
+use config::app_config::AppConfig;
 use transport::routes::create_router;
+use wiring::container::AppContainer;
 
 /// Start the HTTP server and mount embedding routes.
 ///
@@ -31,10 +32,11 @@ use transport::routes::create_router;
 #[tokio::main]
 async fn main() {
     let app = AppContainer::new();
+    let config = AppConfig::load();
 
     let router = create_router(app.embedding_service.clone());
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 4001));
+    let addr = SocketAddr::from(([0, 0, 0, 0], config.port));
     println!("Embedding Service running at http://{}", addr);
 
     let listener = TcpListener::bind(addr).await.unwrap();

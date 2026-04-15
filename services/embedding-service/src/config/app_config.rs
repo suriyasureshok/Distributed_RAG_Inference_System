@@ -17,8 +17,6 @@ impl AppConfig {
     /// ## Returns
     /// An `AppConfig` with default values for local execution.
     pub fn load() -> Self {
-        Self {
-            port: 4001,
-        }
+        Self { port: 4001 }
     }
 }

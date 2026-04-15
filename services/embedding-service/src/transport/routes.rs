@@ -2,7 +2,7 @@
 //!
 //! Build the HTTP router for embedding-service.
 
-use axum::{routing::post, Router};
+use axum::{Router, routing::post};
 use std::sync::Arc;
 
 use crate::service::embedding_service::EmbeddingService;

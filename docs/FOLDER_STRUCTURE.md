@@ -26,6 +26,7 @@ rag-infra-system/
 │   │   │   ├── main.rs
 │   │   │   ├── transport/
 │   │   │   ├── service/
+|   |   |   ├── wiring/              # dependency injection
 │   │   │   └── config/
 │   │   ├── Cargo.toml
 │   │   └── Dockerfile
@@ -33,9 +34,10 @@ rag-infra-system/
 │   ├── llm-service/
 │   │   ├── src/
 │   │   │   ├── main.rs
-│   │   │   ├── router/              # provider selection
+│   │   │   ├── transport/             # HTTP handlers
 │   │   │   ├── providers/           # OpenAI, local, etc.
-│   │   │   └── config/
+|   |   |   ├── wiring/              # dependency injection
+│   │   │   └── service/             # LLM-specific logic
 │   │   ├── Cargo.toml
 │   │   └── Dockerfile
 │

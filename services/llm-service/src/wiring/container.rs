@@ -4,7 +4,7 @@
 
 use std::sync::Arc;
 
-use crate::service::llm_service::LLMService;
+use crate::service::llm_service::{LLMService, LLMServiceConfig};
 use shared::resilience::circuit_breaker::CircuitBreaker;
 
 /// Hold fully-wired application components.
@@ -23,7 +23,8 @@ impl AppContainer {
     /// An `AppContainer` with configured service dependencies.
     pub fn new() -> Self {
         let circuit_breaker = Arc::new(CircuitBreaker::new(5, std::time::Duration::from_secs(30)));
-        let llm_service = Arc::new(LLMService::new(circuit_breaker));
+        let service_config = LLMServiceConfig::from_env();
+        let llm_service = Arc::new(LLMService::new(circuit_breaker, service_config));
 
         Self { llm_service }
     }

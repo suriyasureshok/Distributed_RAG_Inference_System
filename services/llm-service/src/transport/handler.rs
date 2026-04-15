@@ -2,7 +2,7 @@
 //!
 //! Implement request/response handling for generation endpoints.
 
-use axum::{Json, extract::State};
+use axum::{Json, extract::State, http::StatusCode};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
@@ -35,17 +35,26 @@ pub struct LLMResponse {
 /// - `Json(req)`: Request payload containing generation context.
 ///
 /// ## Returns
-/// JSON response with generated answer or fallback error message.
+/// JSON response with generated answer on success.
+///
+/// ## Errors
+/// Returns `500 Internal Server Error` with JSON body when generation fails.
 pub async fn generate(
     State(service): State<Arc<LLMService>>,
     Json(req): Json<LLMRequest>,
-) -> Json<LLMResponse> {
+) -> Result<Json<LLMResponse>, (StatusCode, Json<LLMResponse>)> {
     let result = service.generate(req.context).await;
 
     match result {
-        Ok(answer) => Json(LLMResponse { answer }),
-        Err(_) => Json(LLMResponse {
-            answer: "Internal error".to_string(),
-        }),
+        Ok(answer) => Ok(Json(LLMResponse { answer })),
+        Err(e) => {
+            tracing::error!(error = %e, "LLM generation failed");
+            Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(LLMResponse {
+                    answer: "Internal error".to_string(),
+                }),
+            ))
+        }
     }
 }

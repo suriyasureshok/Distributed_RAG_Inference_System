@@ -29,8 +29,8 @@ impl PrimaryProvider {
         // simulate latency
         tokio::time::sleep(Duration::from_millis(200)).await;
 
-        // simulate occasional failure
-        if context.len() % 2 == 0 {
+        // simulate occasional failure, but allow empty context explicitly
+        if !context.is_empty() && context.len() % 2 == 0 {
             return Err("Primary LLM failed".to_string());
         }
 
